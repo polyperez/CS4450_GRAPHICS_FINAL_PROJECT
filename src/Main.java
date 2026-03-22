@@ -41,7 +41,7 @@ public class Main {
         System.out.println("drawing cube");
         cube.draw();// IMPORTANT
         
-        angle += 0.5f;
+        angle += 0f; //Handle the rotation
         
         Display.update();
         //Display.sync(60);
