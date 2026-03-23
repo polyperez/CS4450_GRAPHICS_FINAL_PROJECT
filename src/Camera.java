@@ -48,37 +48,31 @@ public void pitch(float amount)
 
 public void walkForward(float distance)
 {
-float xOffset = distance * (float)Math.sin(Math.toRadians(yaw));
-float zOffset = distance * (float)Math.cos(Math.toRadians(yaw));
-position.x -= xOffset;
-position.z += zOffset;
+position.x += distance * (float)Math.sin(Math.toRadians(yaw));
+position.z -= distance * (float)Math.cos(Math.toRadians(yaw));
+
 }
 
 //moves the camera backward relative to its current rotation (yaw)
 public void walkBackwards(float distance)
 {
-float xOffset = distance * (float)Math.sin(Math.toRadians(yaw));
-float zOffset = distance * (float)Math.cos(Math.toRadians(yaw));
-position.x += xOffset;
-position.z -= zOffset;
+position.x -= distance * (float)Math.sin(Math.toRadians(yaw));
+position.z += distance * (float)Math.cos(Math.toRadians(yaw));
 }
 
 //strafes the camera left relative to its current rotation (yaw)
 public void strafeLeft(float distance)
 {
-float xOffset = distance * (float)Math.sin(Math.toRadians(yaw-90));
-float zOffset = distance * (float)Math.cos(Math.toRadians(yaw-90));
-position.x -= xOffset;
-position.z += zOffset;
+position.x -= distance * (float)Math.sin(Math.toRadians(yaw+90));
+position.z += distance * (float)Math.cos(Math.toRadians(yaw+90));
+
 }
 
 //strafes the camera right relative to its current rotation (yaw)
 public void strafeRight(float distance)
 {
-float xOffset = distance * (float)Math.sin(Math.toRadians(yaw+90));
-float zOffset = distance * (float)Math.cos(Math.toRadians(yaw+90));
-position.x -= xOffset;
-position.z += zOffset;
+position.x -= distance * (float)Math.sin(Math.toRadians(yaw-90));
+position.z += distance * (float)Math.cos(Math.toRadians(yaw-90));
 }
 
 //moves the camera up relative to its current rotation (yaw)

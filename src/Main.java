@@ -46,6 +46,9 @@ public class Main {
         if (Keyboard.isKeyDown(Keyboard.KEY_W)) camera.walkForward(0.1f);
         if (Keyboard.isKeyDown(Keyboard.KEY_S)) camera.walkBackwards(0.1f);
         
+        if (Keyboard.isKeyDown(Keyboard.KEY_A)) camera.strafeLeft(0.1f);
+        if (Keyboard.isKeyDown(Keyboard.KEY_D)) camera.strafeRight(0.1f);
+        
         glLoadIdentity();
         glTranslatef(0,0,-5);
         glRotatef(angle,1,1,0);
