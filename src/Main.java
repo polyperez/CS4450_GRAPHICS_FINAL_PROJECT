@@ -11,6 +11,7 @@ import org.lwjgl.opengl.DisplayMode;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import org.lwjgl.input.Mouse;
 
 /**
  *
@@ -27,8 +28,13 @@ public class Main {
     glEnable(GL_DEPTH_TEST);
     initGL();
     
+    //Create cube
     Cube cube = new Cube();
     float angle = 0;
+    
+    //Create camera
+    Camera camera = new Camera(0, 0, 0);
+    Mouse.setGrabbed(true);
     
     while(!Display.isCloseRequested()){
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -37,11 +43,21 @@ public class Main {
         glLoadIdentity();
         glTranslatef(0,0,-5);
         glRotatef(angle,1,1,0);
-        
+       
+       //Cube stuff 
         System.out.println("drawing cube");
         cube.draw();// IMPORTANT
         
         angle += 0f; //Handle the rotation
+        
+        camera.yaw(Mouse.getDX() * 0.1f);
+        camera.pitch(Mouse.getDY() * 0.1f);
+
+        if (Keyboard.isKeyDown(Keyboard.KEY_W)) camera.walkForward(0.1f);
+        if (Keyboard.isKeyDown(Keyboard.KEY_S)) camera.walkBackwards(0.1f);
+
+        glLoadIdentity();
+        camera.lookThrough();
         
         Display.update();
         //Display.sync(60);
