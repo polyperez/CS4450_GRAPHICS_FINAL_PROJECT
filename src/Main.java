@@ -40,24 +40,24 @@ public class Main {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         //render();
         
+        camera.yaw(Mouse.getDX() * 0.1f);
+        camera.pitch(Mouse.getDY() * 0.1f);
+        
+        if (Keyboard.isKeyDown(Keyboard.KEY_W)) camera.walkForward(0.1f);
+        if (Keyboard.isKeyDown(Keyboard.KEY_S)) camera.walkBackwards(0.1f);
+        
         glLoadIdentity();
         glTranslatef(0,0,-5);
         glRotatef(angle,1,1,0);
        
-       //Cube stuff 
+        glLoadIdentity();
+        camera.lookThrough();
+        
+        //Cube stuff 
         System.out.println("drawing cube");
         cube.draw();// IMPORTANT
         
         angle += 0f; //Handle the rotation
-        
-        camera.yaw(Mouse.getDX() * 0.1f);
-        camera.pitch(Mouse.getDY() * 0.1f);
-
-        if (Keyboard.isKeyDown(Keyboard.KEY_W)) camera.walkForward(0.1f);
-        if (Keyboard.isKeyDown(Keyboard.KEY_S)) camera.walkBackwards(0.1f);
-
-        glLoadIdentity();
-        camera.lookThrough();
         
         Display.update();
         //Display.sync(60);

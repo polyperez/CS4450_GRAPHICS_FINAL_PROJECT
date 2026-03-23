@@ -17,8 +17,12 @@ public class Camera {
     private float yaw = 0.0f;
     //the rotation around the X axis of the camera
     private float pitch = 0.0f;
-    private Vector3Float me;
+    //private Vector3Float me;
+    
+    public Camera(float x, float y, float z){
+       position = new Vector3f(x,y,z);
     }
+    
 
     public void FPCameraController(float x, float y, float z)
     {
@@ -97,5 +101,6 @@ glRotatef(pitch, 1.0f, 0.0f, 0.0f);
 //roatate the yaw around the Y axis
 glRotatef(yaw, 0.0f, 1.0f, 0.0f);
 //translate to the position vector's location
-glTranslatef(position.x, position.y, position.z);
+glTranslatef(-position.x, -position.y, -position.z);
+}
 }
