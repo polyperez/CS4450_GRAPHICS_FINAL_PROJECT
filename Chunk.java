@@ -32,10 +32,11 @@ public void render(){
 glPushMatrix();
 glBindBuffer(GL_ARRAY_BUFFER,
 VBOVertexHandle);
-//glVertexPointer(3, GL_FLOAT, 0, 0L);
+glVertexPointer(3, GL_FLOAT, 0, 0L);
 glBindBuffer(GL_ARRAY_BUFFER,
 VBOColorHandle);
-//glColorPointer(3,GL_FLOAT, 0, 0L);
+glColorPointer(3,GL_FLOAT, 0, 0L);
+//draw call
 glDrawArrays(GL_QUADS, 0,
 CHUNK_SIZE *CHUNK_SIZE*
 CHUNK_SIZE * 24);
@@ -70,15 +71,11 @@ public void rebuildMesh(
         (float)(startZ + z * CUBE_LENGTH)
     )
 );
-    VertexColorData.put(
-    createCubeVertexCol(
-    getCubeColor(
-    Blocks[(int) x]
-    [(int) y]
-    [(int) z])));
+    VertexColorData.put(createCubeVertexCol(getCubeColor(Blocks[(int) x][(int) y][(int) z])));
+        }
     }
-    }
-    } VertexColorData.flip();
+   } 
+    VertexColorData.flip();
     VertexPositionData.flip();
     glBindBuffer(GL_ARRAY_BUFFER,
     VBOVertexHandle);
@@ -186,59 +183,9 @@ public Chunk(int startX, int startY, int startZ){
                 rebuildMesh(startX, startY, startZ);
                 }
 
-    //new stuff
-    VertexColorData.put(createCubeVertexCol(getCubeColor
-    (Blocks[(int) x][(int) y][(int) z])));
-            }
-        }
-    }
-        VertexColorData.flip();
-        VertexPositionData.flip();
-        glBindBuffer(GL_ARRAY_BUFFER, VBOVertexHandle);glBufferData(GL_ARRAY_BUFFER, VertexPositionData,
-        GL_STATIC_DRAW);
-        glBindBuffer(GL_ARRAY_BUFFER, 0); glBindBuffer(GL_ARRAY_BUFFER, VBOColorHandle);glBufferData(GL_ARRAY_BUFFER, VertexColorData,GL_STATIC_DRAW);glBindBuffer(GL_ARRAY_BUFFER, 0);
-    }
-            }
-    private float[] createCubeVertexCol(float[] CubeColorArray) {
-    float[] cubeColors= new float[CubeColorArray.length* 4 * 6];
-    for (int i= 0; i< cubeColors.length; i++) {
-    cubeColors[i] = CubeColorArray[i%CubeColorArray.length];
-    }
-    return cubeColors;
-    }
-
-    public static float[] createCube(float x, float y, float z) 
-    {
-        int offset = CUBE_LENGTH / 2; return new float[] 
-    {   // TOP QUADx + offset, y + offset, z,
-        x -offset, y + offset, z,
-        x -offset, y + offset, z - CUBE_LENGTH,
-        x + offset, y + offset, z - CUBE_LENGTH,
-        //BOTTOM QUAD
-        x + offset, y -offset, z -CUBE_LENGTH, 
-        x -offset, y -offset, z -CUBE_LENGTH,
-        x -offset, y -offset, z,
-        x + offset, y -offset, z,
-        //FRONT QUAD
-        x + offset, y + offset, z - CUBE_LENGTH,
-        x -offset, y + offset, z - CUBE_LENGTH,
-        x -offset, y -offset, z -CUBE_LENGTH,
-        x + offset, y -offset, z -CUBE_LENGTH,
-    //  BACK QUAD
-        x + offset, y -offset, z,
-        x -offset, y -offset, z,
-        x -offset, y + offset, z,
-        x + offset, y + offset, z,
-    // LEFT QUAD
-       x -offset, y + offset, 
-       z - CUBE_LENGTH, x -offset, y + offset, z, x -offset, y -offset, z, x -offset, y -offset, z -CUBE_LENGTH,
-    // RIGHT QUAD
-       x + offset, y + offset, z,
-       x + offset, y + offset, z - CUBE_LENGTH,
-       x + offset, y -offset, z - CUBE_LENGTH,
-       x + offset, y -offset, z };
 
 
+    
 
 
 
