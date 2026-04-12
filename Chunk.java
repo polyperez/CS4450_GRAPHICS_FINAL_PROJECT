@@ -61,6 +61,7 @@ public void rebuildMesh(
         BufferUtils.createFloatBuffer(
        (CHUNK_SIZE* CHUNK_SIZE *
         CHUNK_SIZE) * 6 * 12);
+        //Fill every position with a cube...
         for (float x = 0; x < CHUNK_SIZE; x += 1) {
             for (float z = 0; z < CHUNK_SIZE; z += 1) {
                 for(float y = 0; y < CHUNK_SIZE; y++){
@@ -181,7 +182,7 @@ public Chunk(int startX, int startY, int startZ){
                 StartY = startY;
                 StartZ = startZ;
                 rebuildMesh(startX, startY, startZ);
-                }
+                }}
 
 
 

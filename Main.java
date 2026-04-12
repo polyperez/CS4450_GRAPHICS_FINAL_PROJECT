@@ -29,6 +29,7 @@ public class Main {
     
     //Create cube
     Cube cube = new Cube();
+    Chunk chunk = new Chunk(0,-10,-20);
     float angle = 0;
     
     //Create camera
@@ -73,6 +74,7 @@ public class Main {
         //Cube stuff 
         System.out.println("drawing cube");
         cube.draw();// IMPORTANT
+        chunk.render();
         
         Display.update();
         //Display.sync(60);
