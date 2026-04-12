@@ -91,6 +91,9 @@ private static void initGL(){
     float aspect = 640f / 480f;
     glFrustum(-aspect, aspect, -1, 1, 1, 100);
     glMatrixMode(GL_MODELVIEW);
+    
+    glEnable(GL_TEXTURE_2D);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
             }
   }
 
