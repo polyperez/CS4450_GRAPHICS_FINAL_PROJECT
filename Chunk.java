@@ -8,22 +8,29 @@ import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
 import org.newdawn.slick.util.ResourceLoader;
 
+/**
+ *
+ * @author Victor, Tai Ji Chen
+ * GROUP: 404 Bug Not Found
+ * CS4450 Spring 2026
+ * 
+ */
+
 public class Chunk {
     private int VBOTextureHandle;
     private Texture texture;
 
     static final int CHUNK_SIZE = 30;
     static final int CUBE_LENGTH = 2;
+    static final int WATER_LEVEL = 4;
 
     private Block[][][] Blocks;
     private int VBOVertexHandle;
+    private int vertexCount;
 
     private int StartX, StartY, StartZ;
-    private Random r;
 
     public Chunk(int startX, int startY, int startZ) {
-        r = new Random();
-
         try {
             texture = TextureLoader.getTexture("PNG",
                     ResourceLoader.getResourceAsStream("terrain.png"));
@@ -35,31 +42,63 @@ public class Chunk {
 
         Blocks = new Block[CHUNK_SIZE][CHUNK_SIZE][CHUNK_SIZE];
 
-        for (int x = 0; x < CHUNK_SIZE; x++) {
-            for (int y = 0; y < CHUNK_SIZE; y++) {
-                for (int z = 0; z < CHUNK_SIZE; z++) {
-                    float rand = r.nextFloat();
-
-                    if (rand > 0.7f) {
-                        Blocks[x][y][z] = new Block(Block.BlockType.BlockType_Grass);
-                    } else if (rand > 0.4f) {
-                        Blocks[x][y][z] = new Block(Block.BlockType.BlockType_Dirt);
-                    } else if (rand > 0.2f) {
-                        Blocks[x][y][z] = new Block(Block.BlockType.BlockType_Water);
-                    } else {
-                        Blocks[x][y][z] = new Block(Block.BlockType.BlockType_Stone);
-                    }
-
-                    Blocks[x][y][z].setActive(true);
-                }
-            }
-        }
-
         StartX = startX;
         StartY = startY;
         StartZ = startZ;
 
+        generateTerrain();
         rebuildMesh(startX, startY, startZ);
+    }
+
+    private void generateTerrain() {
+        int seed = new Random().nextInt();
+        NoiseGenerate noise = new NoiseGenerate(32, 0.5, seed);
+
+        int minHeight = 2;
+        int maxHeight = 12;
+        int[][] heights = noise.generateChunkHeights(0, 0, minHeight, maxHeight);
+
+        for (int x = 0; x < CHUNK_SIZE; x++) {
+            for (int y = 0; y < CHUNK_SIZE; y++) {
+                for (int z = 0; z < CHUNK_SIZE; z++) {
+                    Blocks[x][y][z] = new Block(Block.BlockType.BlockType_Default);
+                    Blocks[x][y][z].setActive(false);
+                }
+            }
+        }
+
+        for (int x = 0; x < CHUNK_SIZE; x++) {
+            for (int z = 0; z < CHUNK_SIZE; z++) {
+                int height = heights[x][z];
+
+                for (int y = 0; y <= height && y < CHUNK_SIZE; y++) {
+                    Block block;
+
+                    if (y == 0) {
+                        block = new Block(Block.BlockType.BlockType_Bedrock);
+                    } else if (y == height) {
+                        if (height <= WATER_LEVEL) {
+                            block = new Block(Block.BlockType.BlockType_Sand);
+                        } else {
+                            block = new Block(Block.BlockType.BlockType_Grass);
+                        }
+                    } else if (y >= height - 2) {
+                        block = new Block(Block.BlockType.BlockType_Dirt);
+                    } else {
+                        block = new Block(Block.BlockType.BlockType_Stone);
+                    }
+
+                    block.setActive(true);
+                    Blocks[x][y][z] = block;
+                }
+
+                for (int y = height + 1; y <= WATER_LEVEL && y < CHUNK_SIZE; y++) {
+                    Block water = new Block(Block.BlockType.BlockType_Water);
+                    water.setActive(true);
+                    Blocks[x][y][z] = water;
+                }
+            }
+        }
     }
 
     public void render() {
@@ -80,7 +119,7 @@ public class Chunk {
         glBindBuffer(GL_ARRAY_BUFFER, VBOTextureHandle);
         glTexCoordPointer(2, GL_FLOAT, 0, 0L);
 
-        glDrawArrays(GL_QUADS, 0, CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE * 24);
+        glDrawArrays(GL_QUADS, 0, vertexCount);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -94,34 +133,41 @@ public class Chunk {
         VBOVertexHandle = glGenBuffers();
         VBOTextureHandle = glGenBuffers();
 
-        FloatBuffer VertexPositionData = BufferUtils.createFloatBuffer(
-                (CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE) * 6 * 12);
+        FloatBuffer vertexData = BufferUtils.createFloatBuffer(CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE * 72);
+        FloatBuffer textureData = BufferUtils.createFloatBuffer(CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE * 48);
 
-        FloatBuffer VertexTextureData = BufferUtils.createFloatBuffer(
-                (CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE) * 6 * 8);
+        int activeBlockCount = 0;
 
-        for (float x = 0; x < CHUNK_SIZE; x++) {
-            for (float z = 0; z < CHUNK_SIZE; z++) {
-                for (float y = 0; y < CHUNK_SIZE; y++) {
-                    VertexPositionData.put(createCube(
+        for (int x = 0; x < CHUNK_SIZE; x++) {
+            for (int y = 0; y < CHUNK_SIZE; y++) {
+                for (int z = 0; z < CHUNK_SIZE; z++) {
+                    Block block = Blocks[x][y][z];
+
+                    if (block == null || !block.isActive()) {
+                        continue;
+                    }
+
+                    vertexData.put(createCube(
                             startX + x * CUBE_LENGTH,
                             startY + y * CUBE_LENGTH,
                             startZ + z * CUBE_LENGTH));
 
-                    VertexTextureData.put(
-                            createCubeTexCoords(Blocks[(int) x][(int) y][(int) z]));
+                    textureData.put(createCubeTexCoords(block));
+                    activeBlockCount++;
                 }
             }
         }
 
-        VertexPositionData.flip();
-        VertexTextureData.flip();
+        vertexData.flip();
+        textureData.flip();
+
+        vertexCount = activeBlockCount * 24;
 
         glBindBuffer(GL_ARRAY_BUFFER, VBOVertexHandle);
-        glBufferData(GL_ARRAY_BUFFER, VertexPositionData, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, vertexData, GL_STATIC_DRAW);
 
         glBindBuffer(GL_ARRAY_BUFFER, VBOTextureHandle);
-        glBufferData(GL_ARRAY_BUFFER, VertexTextureData, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, textureData, GL_STATIC_DRAW);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
@@ -177,9 +223,6 @@ public class Chunk {
 
         switch (block.GetID()) {
             case 0: // Grass
-                // top-left tile you pointed out is grass top
-                // dirt = (2,0)
-                // grass side = (3,0)
                 topCol = 0;    topRow = 0;
                 bottomCol = 2; bottomRow = 0;
                 sideCol = 3;   sideRow = 0;

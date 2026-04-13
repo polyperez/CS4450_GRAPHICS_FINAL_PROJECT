@@ -6,6 +6,14 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 
+/**
+ *
+ * @author  Tai Ji Chen, Victor
+ * GROUP: 404 Bug Not Found
+ * CS4450 Spring 2026
+ * 
+ */
+
 public class Main {
 
     public static void main(String[] args) throws LWJGLException {

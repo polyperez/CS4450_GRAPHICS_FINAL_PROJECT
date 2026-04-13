@@ -1,3 +1,11 @@
+/**
+ *
+ * @author Victor, Tai Ji Chen
+ * GROUP: 404 Bug Not Found
+ * CS4450 Spring 2026
+ * 
+ */
+
 public class Block {
     private boolean isActive;
     private BlockType type;
