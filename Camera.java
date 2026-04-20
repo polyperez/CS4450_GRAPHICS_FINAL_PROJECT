@@ -28,6 +28,9 @@ public class Camera {
        position = new Vector3f(x,y,z);
     }
     
+    public Vector3f getPosition() {
+    return position;
+    }
 
     public void FPCameraController(float x, float y, float z)
     {
