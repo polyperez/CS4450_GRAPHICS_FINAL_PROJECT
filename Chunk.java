@@ -214,6 +214,7 @@ public class Chunk {
         };
     }
 
+    
     private float[] createCubeTexCoords(Block block) {
         float tileSize = 1.0f / 16.0f;
 

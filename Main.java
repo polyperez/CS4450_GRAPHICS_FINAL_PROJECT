@@ -1,3 +1,4 @@
+import org.lwjgl.BufferUtils;
 import static org.lwjgl.opengl.GL11.*;
 
 import org.lwjgl.LWJGLException;
@@ -5,6 +6,10 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
+
+
+
+import java.nio.FloatBuffer;
 
 /**
  *
@@ -15,6 +20,9 @@ import org.lwjgl.opengl.DisplayMode;
  */
 
 public class Main {
+    
+   // private static FloatBuffer lightPosition;
+    private static FloatBuffer whiteLight;
 
     public static void main(String[] args) throws LWJGLException {
         Display.setDisplayMode(new DisplayMode(640, 480));
@@ -61,8 +69,27 @@ public class Main {
             if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) {
                 camera.moveDown(0.3f);
             }
-
+            
+            //apply camera
             camera.lookThrough();
+            
+            // get camera position
+            Vector3f pos = camera.getPosition();
+            
+            // 👇 light follows camera
+            FloatBuffer lightPosition = BufferUtils.createFloatBuffer(4);
+           lightPosition.put(camera.getX());
+           lightPosition.put(camera.getY());
+           lightPosition.put(camera.getZ());
+           lightPosition.put(1.0f);
+           lightPosition.flip();
+           
+           
+
+glLight(GL_LIGHT0, GL_POSITION, lightPosition);
+
+chunk.render();
+            
             chunk.render();
 
             Display.update();
@@ -84,5 +111,27 @@ public class Main {
 
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_TEXTURE_2D);
+        
+        initLightArrays();
+        glLight(GL_LIGHT0, GL_POSITION, lightPosition); //sets our light’s position
+        glLight(GL_LIGHT0, GL_SPECULAR, whiteLight);//sets our specular light
+        glLight(GL_LIGHT0, GL_DIFFUSE, whiteLight);//sets our diffuse light
+        glLight(GL_LIGHT0, GL_AMBIENT, whiteLight);//sets our ambient light
+        
+        
+        glEnable(GL_LIGHTING);//enables our lighting
+        glEnable(GL_LIGHT0);//enables light0
+        
+        
+    }
+    
+    //XYZ values give where we want to place our source
+    private static void initLightArrays() {
+        lightPosition = BufferUtils.createFloatBuffer(4);
+        lightPosition.put(0.0f).put(0.0f).put(0.0f).put(1.0f).flip();
+
+        whiteLight = BufferUtils.createFloatBuffer(4);
+        whiteLight.put(1.0f).put(1.0f).put(1.0f).put(0.0f).flip();
+        
     }
 }
