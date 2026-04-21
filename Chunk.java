@@ -13,11 +13,13 @@ import org.newdawn.slick.util.ResourceLoader;
  * @author Victor, Tai Ji Chen
  * GROUP: 404 Bug Not Found
  * CS4450 Spring 2026
- * 
+ *
  */
 
 public class Chunk {
     private int VBOTextureHandle;
+    private int VBOVertexHandle;
+    private int VBONormalHandle;
     private Texture texture;
 
     static final int CHUNK_SIZE = 30;
@@ -25,7 +27,6 @@ public class Chunk {
     static final int WATER_LEVEL = 4;
 
     private Block[][][] Blocks;
-    private int VBOVertexHandle;
     private int vertexCount;
 
     private int StartX, StartY, StartZ;
@@ -61,12 +62,12 @@ public class Chunk {
         for (int x = 0; x < CHUNK_SIZE; x++) {
             for (int y = 0; y < CHUNK_SIZE; y++) {
                 for (int z = 0; z < CHUNK_SIZE; z++) {
-                    Blocks[x][y][z] = new Block(Block.BlockType.BlockType_Default);
+                    Blocks[x][y][z] = new Block(Block.BlockType.BlockType_Grass);
                     Blocks[x][y][z].setActive(false);
                 }
             }
         }
-
+        //Types of blocks to load...
         for (int x = 0; x < CHUNK_SIZE; x++) {
             for (int z = 0; z < CHUNK_SIZE; z++) {
                 int height = heights[x][z];
@@ -112,6 +113,7 @@ public class Chunk {
 
         glEnableClientState(GL_VERTEX_ARRAY);
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+        glEnableClientState(GL_NORMAL_ARRAY);
 
         glBindBuffer(GL_ARRAY_BUFFER, VBOVertexHandle);
         glVertexPointer(3, GL_FLOAT, 0, 0L);
@@ -119,10 +121,14 @@ public class Chunk {
         glBindBuffer(GL_ARRAY_BUFFER, VBOTextureHandle);
         glTexCoordPointer(2, GL_FLOAT, 0, 0L);
 
+        glBindBuffer(GL_ARRAY_BUFFER, VBONormalHandle);
+        glNormalPointer(GL_FLOAT, 0, 0L);
+
         glDrawArrays(GL_QUADS, 0, vertexCount);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+        glDisableClientState(GL_NORMAL_ARRAY);
         glDisableClientState(GL_TEXTURE_COORD_ARRAY);
         glDisableClientState(GL_VERTEX_ARRAY);
 
@@ -132,9 +138,11 @@ public class Chunk {
     public void rebuildMesh(float startX, float startY, float startZ) {
         VBOVertexHandle = glGenBuffers();
         VBOTextureHandle = glGenBuffers();
+        VBONormalHandle = glGenBuffers();
 
         FloatBuffer vertexData = BufferUtils.createFloatBuffer(CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE * 72);
         FloatBuffer textureData = BufferUtils.createFloatBuffer(CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE * 48);
+        FloatBuffer normalData = BufferUtils.createFloatBuffer(CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE * 72);
 
         int activeBlockCount = 0;
 
@@ -153,6 +161,8 @@ public class Chunk {
                             startZ + z * CUBE_LENGTH));
 
                     textureData.put(createCubeTexCoords(block));
+                    normalData.put(createCubeNormals());
+
                     activeBlockCount++;
                 }
             }
@@ -160,6 +170,7 @@ public class Chunk {
 
         vertexData.flip();
         textureData.flip();
+        normalData.flip();
 
         vertexCount = activeBlockCount * 24;
 
@@ -168,6 +179,9 @@ public class Chunk {
 
         glBindBuffer(GL_ARRAY_BUFFER, VBOTextureHandle);
         glBufferData(GL_ARRAY_BUFFER, textureData, GL_STATIC_DRAW);
+
+        glBindBuffer(GL_ARRAY_BUFFER, VBONormalHandle);
+        glBufferData(GL_ARRAY_BUFFER, normalData, GL_STATIC_DRAW);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
@@ -214,7 +228,46 @@ public class Chunk {
         };
     }
 
-    
+    public static float[] createCubeNormals() {
+        return new float[] {
+            // TOP
+            0.0f, 1.0f, 0.0f,
+            0.0f, 1.0f, 0.0f,
+            0.0f, 1.0f, 0.0f,
+            0.0f, 1.0f, 0.0f,
+
+            // BOTTOM
+            0.0f, -1.0f, 0.0f,
+            0.0f, -1.0f, 0.0f,
+            0.0f, -1.0f, 0.0f,
+            0.0f, -1.0f, 0.0f,
+
+            // FRONT
+            0.0f, 0.0f, -1.0f,
+            0.0f, 0.0f, -1.0f,
+            0.0f, 0.0f, -1.0f,
+            0.0f, 0.0f, -1.0f,
+
+            // BACK
+            0.0f, 0.0f, 1.0f,
+            0.0f, 0.0f, 1.0f,
+            0.0f, 0.0f, 1.0f,
+            0.0f, 0.0f, 1.0f,
+
+            // LEFT
+            -1.0f, 0.0f, 0.0f,
+            -1.0f, 0.0f, 0.0f,
+            -1.0f, 0.0f, 0.0f,
+            -1.0f, 0.0f, 0.0f,
+
+            // RIGHT
+            1.0f, 0.0f, 0.0f,
+            1.0f, 0.0f, 0.0f,
+            1.0f, 0.0f, 0.0f,
+            1.0f, 0.0f, 0.0f
+        };
+    }
+
     private float[] createCubeTexCoords(Block block) {
         float tileSize = 1.0f / 16.0f;
 

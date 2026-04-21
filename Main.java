@@ -9,17 +9,26 @@ import org.lwjgl.opengl.DisplayMode;
 
 import java.nio.FloatBuffer;
 
+/**
+ *
+ * @author  Tai Ji Chen, Victor
+ * GROUP: 404 Bug Not Found
+ * CS4450 Spring 2026
+ *
+ */
+
 public class Main {
 
     private static FloatBuffer lightPosition;
     private static FloatBuffer whiteLight;
     private static FloatBuffer dimLight;
-    
+    private static FloatBuffer noAmbient;
+
     public static void main(String[] args) throws LWJGLException {
         Display.setDisplayMode(new DisplayMode(640, 480));
         Display.setTitle("CS4450 Final Project");
         Display.create();
-        
+
         initGL();
 
         Chunk chunk = new Chunk(0, -10, -20);
@@ -31,23 +40,36 @@ public class Main {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glLoadIdentity();
 
-            if (Keyboard.isKeyDown(Keyboard.KEY_Q) || Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
+            if (Keyboard.isKeyDown(Keyboard.KEY_Q) ||
+                Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
                 break;
             }
 
             camera.yaw(Mouse.getDX() * 0.1f);
             camera.pitch(Mouse.getDY() * 0.1f);
 
-            if (Keyboard.isKeyDown(Keyboard.KEY_W)) camera.walkForward(0.3f);
-            if (Keyboard.isKeyDown(Keyboard.KEY_S)) camera.walkBackwards(0.3f);
-            if (Keyboard.isKeyDown(Keyboard.KEY_A)) camera.strafeLeft(0.3f);
-            if (Keyboard.isKeyDown(Keyboard.KEY_D)) camera.strafeRight(0.3f);
-            if (Keyboard.isKeyDown(Keyboard.KEY_SPACE)) camera.moveUp(0.3f);
-            if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) camera.moveDown(0.3f);
+            if (Keyboard.isKeyDown(Keyboard.KEY_W)) {
+                camera.walkForward(0.3f);
+            }
+            if (Keyboard.isKeyDown(Keyboard.KEY_S)) {
+                camera.walkBackwards(0.3f);
+            }
+            if (Keyboard.isKeyDown(Keyboard.KEY_A)) {
+                camera.strafeLeft(0.3f);
+            }
+            if (Keyboard.isKeyDown(Keyboard.KEY_D)) {
+                camera.strafeRight(0.3f);
+            }
+            if (Keyboard.isKeyDown(Keyboard.KEY_SPACE)) {
+                camera.moveUp(0.3f);
+            }
+            if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) {
+                camera.moveDown(0.3f);
+            }
 
             camera.lookThrough();
 
-            // Re-apply directional light after camera transform
+            // Light position must be set after the camera transform
             glLight(GL_LIGHT0, GL_POSITION, lightPosition);
 
             chunk.render();
@@ -74,35 +96,46 @@ public class Main {
 
         initLightArrays();
 
-        // Very low global ambient so the "dark half" is still dimly visible
-        glLightModel(GL_LIGHT_MODEL_AMBIENT, dimLight);
+        glShadeModel(GL_SMOOTH);
+        glEnable(GL_NORMALIZE);
 
+        // Make texture color combine with lighting
+        glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+        /** // Small global ambient so dark side is still visible
+        *glLightModel(GL_LIGHT_MODEL_AMBIENT, dimLight);
+        */
         glLight(GL_LIGHT0, GL_POSITION, lightPosition);
         glLight(GL_LIGHT0, GL_DIFFUSE, whiteLight);
         glLight(GL_LIGHT0, GL_SPECULAR, whiteLight);
-
-        // Keep light ambient at 0 so only lit faces get strong light
-        glLight(GL_LIGHT0, GL_AMBIENT, BufferUtils.createFloatBuffer(4).put(new float[] {0f, 0f, 0f, 1f}));
-        glLight(GL_LIGHT0, GL_AMBIENT, (FloatBuffer) BufferUtils.createFloatBuffer(4).put(new float[] {0f, 0f, 0f, 1f}).flip());
+        glLight(GL_LIGHT0, GL_AMBIENT, noAmbient);
+        /*
+        * // Stronger falloff so one side looks brighter than the other
+        *glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.0f);
+        *glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.02f);
+         glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.001f);*/
 
         glEnable(GL_LIGHTING);
         glEnable(GL_LIGHT0);
+
         glEnable(GL_COLOR_MATERIAL);
         glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+
+        glClearColor(0.5f, 0.7f, 1.0f, 1.0f);
     }
 
     private static void initLightArrays() {
-        // Directional light coming from the +X side toward the world
-        // w = 0.0f means directional light
+        // Point light placed far to the left and above the world
         lightPosition = BufferUtils.createFloatBuffer(4);
-        lightPosition.put(1.0f).put(0.0f).put(0.0f).put(0.0f).flip();
+        lightPosition.put(-15.0f).put(-15.0f).put(-30.0f).put(1.0f).flip();
 
-        //MAIN LIGHT COLOR
         whiteLight = BufferUtils.createFloatBuffer(4);
         whiteLight.put(1.0f).put(1.0f).put(1.0f).put(1.0f).flip();
 
-        //ambient light
         dimLight = BufferUtils.createFloatBuffer(4);
-        dimLight.put(0.15f).put(0.15f).put(0.15f).put(1.0f).flip();
+        dimLight.put(0.03f).put(0.03f).put(0.03f).put(1.0f).flip();
+
+        noAmbient = BufferUtils.createFloatBuffer(4);
+        noAmbient.put(0.0f).put(0.0f).put(0.0f).put(1.0f).flip();
     }
 }
